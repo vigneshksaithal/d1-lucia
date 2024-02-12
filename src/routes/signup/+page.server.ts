@@ -37,10 +37,12 @@ export const actions: Actions = {
     // TODO: check if username is already used
 
     const db = platform?.env.DB;
-    const duration = await db.prepare(
-      "INSERT INTO users (id, username, hashed_password) VALUES (?, ?, ?)",
-      [userId, username, hashedPassword],
-    );
+    const duration = await db
+      .prepare(
+        "INSERT INTO users (id, username, hashed_password) VALUES (?, ?, ?)",
+        [userId, username, hashedPassword],
+      )
+      .run();
     console.log(duration);
 
     const lucia = initializeLucia(db);
