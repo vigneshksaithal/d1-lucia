@@ -1,7 +1,7 @@
 import { initializeLucia } from "$lib/server/auth";
 import { fail, redirect } from "@sveltejs/kit";
 import { Scrypt } from "lucia";
-import type { Actions, PageServerLoad } from "./$types";
+import type { Actions } from "../$types";
 
 export const actions: Actions = {
   default: async ({ request, platform, cookies }) => {
