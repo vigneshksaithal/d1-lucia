@@ -41,8 +41,7 @@ export const actions: Actions = {
 
     const existingUser = await db
       .prepare("SELECT * FROM user WHERE username = ?")
-      .get(username.toLowerCase())
-      .run();
+      .bind(username.toLowerCase());
     if (!existingUser) {
       // NOTE:
       // Returning immediately allows malicious actors to figure out valid usernames from response times,
