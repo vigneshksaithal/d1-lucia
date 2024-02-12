@@ -39,7 +39,7 @@ export const actions: Actions = {
     const db = platform?.env.DB;
     const duration = await db
       .prepare(
-        "INSERT INTO users (id, username, hashed_password) VALUES (?, ?, ?)",
+        "INSERT INTO user (id, username, hashed_password) VALUES (?, ?, ?)",
         [userId, username, hashedPassword],
       )
       .run();
