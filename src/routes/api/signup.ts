@@ -1,12 +1,11 @@
-import { lucia } from "$lib/server/auth";
+import { initializeLucia } from "$lib/server/auth";
 import { fail, redirect } from "@sveltejs/kit";
-import { Argon2id } from "oslo/password";
-
-import type { Actions } from "./$types";
+import { Scrypt } from "lucia";
+import type { Actions, PageServerLoad } from "./$types";
 
 export const actions: Actions = {
-  default: async (event) => {
-    const formData = await event.request.formData();
+  default: async ({ request, platform, cookies }) => {
+    const formData = await request.formData();
     const username = formData.get("username");
     const password = formData.get("password");
 
@@ -30,10 +29,11 @@ export const actions: Actions = {
       });
     }
 
-    const existingUser = await db
-      .table("username")
-      .where("username", "=", username.toLowerCase())
-      .get();
+    const db = platform?.env.DB;
+
+    const existingUser = await db.prepare(
+      `SELECT * FROM user WHERE username = ${username.toLowerCase()}`,
+    );
     if (!existingUser) {
       // NOTE:
       // Returning immediately allows malicious actors to figure out valid usernames from response times,
@@ -49,7 +49,7 @@ export const actions: Actions = {
       });
     }
 
-    const validPassword = await new Argon2id().verify(
+    const validPassword = await new Scrypt().verify(
       existingUser.hashed_password,
       password,
     );
@@ -59,9 +59,10 @@ export const actions: Actions = {
       });
     }
 
+    const lucia = initializeLucia(db);
     const session = await lucia.createSession(existingUser.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
-    event.cookies.set(sessionCookie.name, sessionCookie.value, {
+    cookies.set(sessionCookie.name, sessionCookie.value, {
       path: ".",
       ...sessionCookie.attributes,
     });
