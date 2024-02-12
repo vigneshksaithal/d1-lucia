@@ -40,8 +40,8 @@ export const actions: Actions = {
     const duration = await db
       .prepare(
         "INSERT INTO user (id, username, hashed_password) VALUES (?, ?, ?)",
-        [userId, username, hashedPassword],
       )
+      .bind(userId, username, hashedPassword)
       .run();
     console.log(duration);
 
